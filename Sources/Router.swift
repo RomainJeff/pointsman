@@ -140,7 +140,7 @@ final class Router {
         didSet { config.save() }
     }
     var last = "Aucun lien routé"
-    var hasKey = ProcessInfo.processInfo.environment["OPENROUTER_API_KEY"] != nil || Keychain.get() != nil
+    var hasKey = Router.apiKey != nil
     // ponytail: refreshed on launch, after makeDefault and per link; a change made in System Settings shows up on the next link
     var isDefault = false
 
@@ -195,17 +195,9 @@ final class Router {
         guard let host = url.host, !["localhost", "127.0.0.1", "::1"].contains(host) else { return (c.fallback, "local") }
         let candidates = c.browsers.filter(\.enabled)
         guard !candidates.isEmpty else { return (c.fallback, "aucun candidat") }
-        guard let key = ProcessInfo.processInfo.environment["OPENROUTER_API_KEY"] ?? Keychain.get() else { return (c.fallback, "pas de clé") }
-
-        let state = """
-        User context: \(c.globalContext.isEmpty ? "(none)" : c.globalContext)
-        Link clicked in app: \(opener.name) (\(opener.bundleId))
-        URL: \(Decision.redact(url))
-        """
-        var options = Dictionary(uniqueKeysWithValues: candidates.map { ($0.bundleId, "\($0.name): \($0.description)") })
-        options[Decision.unsure] = "No browser clearly fits this link"
+        guard Self.apiKey != nil else { return (c.fallback, "pas de clé") }
         do {
-            let probs = try await Jev.choose(state: state, options: options, model: c.model, key: key)
+            let probs = try await ask(url, openerName: opener.name, openerId: opener.bundleId)
             let top = probs.max { $0.value < $1.value }.map { "\(Int($0.value * 100)) %" } ?? "?"
             guard let id = Decision.pick(probs, candidates: Set(candidates.map(\.bundleId)), threshold: c.threshold) else {
                 return (c.fallback, "incertain \(top)")
@@ -214,6 +206,22 @@ final class Router {
         } catch {
             return (c.fallback, "erreur: \(error.localizedDescription)")
         }
+    }
+
+    static var apiKey: String? { ProcessInfo.processInfo.environment["OPENROUTER_API_KEY"] ?? Keychain.get() }
+
+    /// Jev's probability per enabled browser, plus "none". Shared by real links and the settings test bench.
+    func ask(_ url: URL, openerName: String, openerId: String) async throws -> [String: Double] {
+        guard let key = Self.apiKey else { throw Jev.Failure(errorDescription: "Clé OpenRouter manquante") }
+        let c = config
+        let state = """
+        User context: \(c.globalContext.isEmpty ? "(none)" : c.globalContext)
+        Link clicked in app: \(openerName) (\(openerId))
+        URL: \(Decision.redact(url))
+        """
+        var options = Dictionary(uniqueKeysWithValues: c.browsers.filter(\.enabled).map { ($0.bundleId, "\($0.name): \($0.description)") })
+        options[Decision.unsure] = "No browser clearly fits this link"
+        return try await Jev.choose(state: state, options: options, model: c.model, key: key)
     }
 
     func makeDefault() {
