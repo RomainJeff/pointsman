@@ -65,25 +65,9 @@ struct MenuContent: View {
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
-        Text(status)
-        ForEach(router.issues, id: \.self) { issue in
-            Button("⚠︎ \(issue.rawValue)") {
-                issue == .notDefault ? router.makeDefault() : openSettings()
-            }
-        }
-        Text("Last: \(router.last)")
-        Divider()
-        Toggle("Smart routing", isOn: $router.config.enabled)
-            .keyboardShortcut("e")
-        if !router.config.browsers.isEmpty {
-            Menu("Browsers offered to Jev") {
-                ForEach($router.config.browsers, id: \.bundleId) { $b in
-                    Toggle(b.name, isOn: $b.enabled)
-                }
-            }
-        }
         Button("Settings…") { openSettings() }
             .keyboardShortcut(",")
+        Text(status)
         Button("Open log") { NSWorkspace.shared.open(Router.logURL) }
         Divider()
         Button("Quit Pointsman") { NSApp.terminate(nil) }
@@ -92,8 +76,9 @@ struct MenuContent: View {
 
     private var status: String {
         let fallback = installedBrowsers().first { $0.id == router.config.fallback }?.name ?? router.config.fallback
-        guard router.config.enabled else { return "Paused: everything goes to \(fallback)" }
-        return "Active: \(router.config.browsers.filter(\.enabled).count) browser(s), fallback \(fallback)"
+        guard router.config.enabled else { return "Status: Paused | all links go to \(fallback)" }
+        if let issue = router.issues.first { return "Status: ⚠︎ \(issue.rawValue)" }
+        return "Status: Active | \(router.config.browsers.filter(\.enabled).count) browser(s), fallback \(fallback)"
     }
 
     private func openSettings() {
