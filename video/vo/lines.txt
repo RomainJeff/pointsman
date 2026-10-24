@@ -1,0 +1,7 @@
+s1|You click a link. It opens in the wrong browser.
+s2|Pointsman sees which app you clicked from, and switches the link onto the right track.
+s3|Jev weighs each of your browsers. When it's not sure, the link goes to your fallback.
+s4a|Tell it how you work, in one sentence.
+s4b|Switch on the browsers you use.
+s4c|And say what each one is for.
+s5|Pointsman. Every link goes to the browser it belongs in.
