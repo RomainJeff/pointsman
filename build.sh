@@ -11,6 +11,7 @@ APP=build/LinkRouter.app
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS"
 cp Info.plist "$APP/Contents/"
+cp -R Resources "$APP/Contents/"
 swiftc -O -parse-as-library -target arm64-apple-macos15 Sources/*.swift -o "$APP/Contents/MacOS/LinkRouter"
 codesign --force --sign - "$APP"
 

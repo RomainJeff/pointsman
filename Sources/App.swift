@@ -5,8 +5,10 @@ struct LinkRouterApp: App {
     @NSApplicationDelegateAdaptor private var delegate: AppDelegate
 
     var body: some Scene {
-        MenuBarExtra("Link Router", systemImage: icon) {
+        MenuBarExtra {
             MenuContent(router: delegate.router)
+        } label: {
+            Image(nsImage: menuBarIcon(icon))
         }
         // A plain Window, not Settings: openSettings is unreliable from a menu bar–only app.
         Window("Réglages Link Router", id: "settings") {
@@ -18,9 +20,18 @@ struct LinkRouterApp: App {
 
     private var icon: String {
         let r = delegate.router
-        if !r.config.enabled { return "pause.circle" }
-        return r.issues.isEmpty ? "arrow.triangle.branch" : "exclamationmark.triangle"
+        if !r.config.enabled { return "menubar-paused" }
+        return r.issues.isEmpty ? "menubar-active" : "menubar-warning"
     }
+}
+
+/// Template image: macOS tints it for light/dark menu bars. Note: NSImage's SVG renderer ignores per-path stroke-opacity, use opacity.
+private func menuBarIcon(_ name: String) -> NSImage {
+    let image = Bundle.main.url(forResource: name, withExtension: "svg").flatMap(NSImage.init(contentsOf:))
+        ?? NSImage(systemSymbolName: "arrow.triangle.branch", accessibilityDescription: nil)!
+    image.isTemplate = true
+    image.accessibilityDescription = "Link Router"
+    return image
 }
 
 @MainActor
