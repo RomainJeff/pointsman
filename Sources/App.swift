@@ -202,7 +202,7 @@ struct BrowsersPane: View {
         Form {
             Section {
                 TextField("Context", text: $router.config.globalContext,
-                          prompt: Text("I'm a developer. Work tools go in Chrome, personal browsing in Safari."), axis: .vertical)
+                          prompt: Text("Work links go in one browser, personal browsing in another."), axis: .vertical)
                     .lineLimit(3...6)
                     .well()
             } header: {
@@ -271,7 +271,7 @@ struct BrowserRow: View {
             .toggleStyle(.switch)
             if rule.enabled {
                 TextField("Description", text: $rule.description,
-                          prompt: Text("Work: GitHub, Notion, Google Docs. Avoid for personal sites."), axis: .vertical)
+                          prompt: Text("When to pick this browser, and when to avoid it."), axis: .vertical)
                     .lineLimit(2...5)
                     .well()
                     .padding(.leading, 42)
@@ -283,8 +283,8 @@ struct BrowserRow: View {
 
 struct DecisionPane: View {
     @Bindable var router: Router
-    @State private var link = "https://github.com/acme/api/pull/42"
-    @State private var opener = "Slack"
+    @State private var link = ""
+    @State private var opener = ""
     @State private var probabilities: [String: Double] = [:]
     @State private var failure: String?
     @State private var asking = false
@@ -312,8 +312,8 @@ struct DecisionPane: View {
                 Text("Below this threshold, or when no browser fits, the link goes to the fallback.")
             }
             Section {
-                TextField("Link", text: $link)
-                TextField("Clicked from", text: $opener)
+                TextField("Link", text: $link, prompt: Text("https://example.com/page"))
+                TextField("Clicked from", text: $opener, prompt: Text("App name"))
                 HStack {
                     if let failure { Text(failure).foregroundStyle(.red).lineLimit(2) }
                     Spacer()
@@ -370,7 +370,7 @@ struct DecisionPane: View {
         asking = true
         failure = nil
         Task {
-            do { probabilities = try await router.ask(url, openerName: opener, openerId: "?") }
+            do { probabilities = try await router.ask(url, openerName: opener.isEmpty ? "unknown" : opener, openerId: "?") }
             catch { failure = error.localizedDescription; probabilities = [:] }
             asking = false
         }
