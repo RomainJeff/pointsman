@@ -65,9 +65,9 @@ struct MenuContent: View {
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
+        Text(status)
         Button("Settings…") { openSettings() }
             .keyboardShortcut(",")
-        Text(status)
         Button("Open log") { NSWorkspace.shared.open(Router.logURL) }
         Divider()
         Button("Quit Pointsman") { NSApp.terminate(nil) }
