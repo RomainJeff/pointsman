@@ -81,12 +81,18 @@
     .verdict { position: absolute; left: 0; top: 0; font-size: 40px; font-weight: 600; white-space: nowrap; }
     .v2 { opacity: 0; }
 
-    /* ---------- S4: details ---------- */
-    .s4-h { font-size: 100px; max-width: 1300px; }
-    .facts { display: flex; gap: 40px; }
-    .fact { flex: 1; border-top: 6px solid #3A4E78; padding-top: 36px; display: flex; flex-direction: column; gap: 18px; }
-    .fact .big { font-size: 64px; font-weight: 600; letter-spacing: -0.02em; }
-    .fact .t { font-size: 30px; line-height: 1.4; color: rgba(243,235,221,0.72); }
+    /* ---------- S4: the real settings window ---------- */
+    .s4-text { flex: 1; }
+    .s4-h { font-size: 96px; }
+    .steps { display: flex; flex-direction: column; gap: 26px; margin-top: 20px; }
+    .step { display: flex; align-items: baseline; gap: 22px; font-size: 38px; line-height: 1.25; opacity: 0.35; }
+    .step b { font-family: 'JetBrains Mono', monospace; font-weight: 500; font-size: 30px; color: #F5B43C; }
+    .ui { flex: 0 0 905px; height: 998px; position: relative; border-radius: 22px; overflow: hidden;
+      box-shadow: 0 40px 90px rgba(0,0,0,0.55), 0 0 0 2px rgba(243,235,221,0.12); }
+    .ui img { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; }
+    .ui img:first-child { opacity: 1; }
+    .cursor { position: absolute; left: 0; top: 0; width: 40px; height: 40px; z-index: 3; opacity: 0; }
+    .click { position: absolute; left: -30px; top: -30px; width: 60px; height: 60px; border-radius: 50%; border: 4px solid #F5B43C; opacity: 0; z-index: 2; }
 
     /* ---------- S5: logo ---------- */
     .s5-row { flex-direction: row; align-items: center; gap: 90px; }
@@ -97,7 +103,7 @@
   </style>
 </head>
 <body>
-<div id="root" data-composition-id="main" data-width="1920" data-height="1080" data-start="0" data-duration="25.5">
+<div id="root" data-composition-id="main" data-width="1920" data-height="1080" data-start="0" data-duration="32.5">
 
   <!-- ===== S1: the problem ===== -->
   <div id="s1" class="scene">
@@ -129,7 +135,7 @@
         <div class="runs">
           <div class="run" id="run0"><div class="k mono">From Slack</div><div class="u mono">github.com/acme/api/pull/42</div><div class="to">Opens in Chrome</div></div>
           <div class="run" id="run1"><div class="k mono">From Messages</div><div class="u mono">youtube.com/watch?v=…</div><div class="to">Opens in Safari</div></div>
-          <div class="run" id="run2"><div class="k mono">From Terminal</div><div class="u mono">docs.python.org/3/library</div><div class="to">Opens in Arc</div></div>
+          <div class="run" id="run2"><div class="k mono">From Terminal</div><div class="u mono">docs.python.org/3/library</div><div class="to">Opens in Dia</div></div>
         </div>
       </div>
       <div class="yard">
@@ -156,7 +162,7 @@
           <circle id="dot" cx="450" cy="900" r="22" fill="#F3EBDD" opacity="0"/>
           <text class="bname" id="nL" x="170" y="80">Chrome</text>
           <text class="bname" id="nM" x="450" y="80">Safari</text>
-          <text class="bname" id="nR" x="730" y="80">Arc</text>
+          <text class="bname" id="nR" x="730" y="80">Dia</text>
         </svg>
       </div>
     </div>
@@ -184,16 +190,23 @@
     </div>
   </div>
 
-  <!-- ===== S4: details ===== -->
+  <!-- ===== S4: the real settings window ===== -->
   <div id="s4" class="scene">
     <div class="glow s4-glow" data-layout-allow-overflow style="width:1500px;height:1500px;right:-500px;top:-700px"></div>
     <div class="track s4-track" data-layout-allow-overflow style="bottom:70px"></div>
-    <div class="scene-content" style="gap:80px">
-      <h2 class="h s4-h">Describe your browsers once. Then forget about it.</h2>
-      <div class="facts">
-        <div class="fact"><div class="big">Plain words</div><div class="t">One sentence per browser. No rules, no regex.</div></div>
-        <div class="fact"><div class="big amber num">&lt; 400 ms</div><div class="t">Decided before the page starts loading.</div></div>
-        <div class="fact"><div class="big">Private</div><div class="t">Only the domain and path leave your Mac. Never the query string.</div></div>
+    <div class="scene-content split" style="padding:41px 120px 41px 140px;gap:90px">
+      <div class="col s4-text">
+        <h2 class="h s4-h">Tell it how you work.</h2>
+        <div class="steps">
+          <div class="step" id="st1"><b>1</b>Write your context</div>
+          <div class="step" id="st2"><b>2</b>Switch on your browsers</div>
+          <div class="step" id="st3"><b>3</b>Say what each one is for</div>
+        </div>
+      </div>
+      <div class="ui">
+        <img id="f0" src="ui/f000.jpg" alt=""><img id="f1" src="ui/f001.jpg" alt=""><img id="f2" src="ui/f002.jpg" alt=""><img id="f3" src="ui/f003.jpg" alt=""><img id="f4" src="ui/f004.jpg" alt=""><img id="f5" src="ui/f005.jpg" alt=""><img id="f6" src="ui/f006.jpg" alt=""><img id="f7" src="ui/f007.jpg" alt=""><img id="f8" src="ui/f008.jpg" alt=""><img id="f9" src="ui/f009.jpg" alt=""><img id="f10" src="ui/f010.jpg" alt=""><img id="f11" src="ui/f011.jpg" alt=""><img id="f12" src="ui/f012.jpg" alt=""><img id="f13" src="ui/f013.jpg" alt=""><img id="f14" src="ui/f014.jpg" alt=""><img id="f15" src="ui/f015.jpg" alt=""><img id="f16" src="ui/f016.jpg" alt=""><img id="f17" src="ui/f017.jpg" alt=""><img id="f18" src="ui/f018.jpg" alt=""><img id="f19" src="ui/f019.jpg" alt=""><img id="f20" src="ui/f020.jpg" alt=""><img id="f21" src="ui/f021.jpg" alt=""><img id="f22" src="ui/f022.jpg" alt=""><img id="f23" src="ui/f023.jpg" alt=""><img id="f24" src="ui/f024.jpg" alt=""><img id="f25" src="ui/f025.jpg" alt=""><img id="f26" src="ui/f026.jpg" alt=""><img id="f27" src="ui/f027.jpg" alt=""><img id="f28" src="ui/f028.jpg" alt=""><img id="f29" src="ui/f029.jpg" alt=""><img id="f30" src="ui/f030.jpg" alt=""><img id="f31" src="ui/f031.jpg" alt=""><img id="f32" src="ui/f032.jpg" alt=""><img id="f33" src="ui/f033.jpg" alt=""><img id="f34" src="ui/f034.jpg" alt=""><img id="f35" src="ui/f035.jpg" alt=""><img id="f36" src="ui/f036.jpg" alt=""><img id="f37" src="ui/f037.jpg" alt=""><img id="f38" src="ui/f038.jpg" alt=""><img id="f39" src="ui/f039.jpg" alt=""><img id="f40" src="ui/f040.jpg" alt=""><img id="f41" src="ui/f041.jpg" alt=""><img id="f42" src="ui/f042.jpg" alt=""><img id="f43" src="ui/f043.jpg" alt=""><img id="f44" src="ui/f044.jpg" alt=""><img id="f45" src="ui/f045.jpg" alt=""><img id="f46" src="ui/f046.jpg" alt=""><img id="f47" src="ui/f047.jpg" alt=""><img id="f48" src="ui/f048.jpg" alt=""><img id="f49" src="ui/f049.jpg" alt=""><img id="f50" src="ui/f050.jpg" alt=""><img id="f51" src="ui/f051.jpg" alt=""><img id="f52" src="ui/f052.jpg" alt=""><img id="f53" src="ui/f053.jpg" alt=""><img id="f54" src="ui/f054.jpg" alt=""><img id="f55" src="ui/f055.jpg" alt=""><img id="f56" src="ui/f056.jpg" alt=""><img id="f57" src="ui/f057.jpg" alt=""><img id="f58" src="ui/f058.jpg" alt=""><img id="f59" src="ui/f059.jpg" alt=""><img id="f60" src="ui/f060.jpg" alt=""><img id="f61" src="ui/f061.jpg" alt=""><img id="f62" src="ui/f062.jpg" alt=""><img id="f63" src="ui/f063.jpg" alt=""><img id="f64" src="ui/f064.jpg" alt=""><img id="f65" src="ui/f065.jpg" alt=""><img id="f66" src="ui/f066.jpg" alt=""><img id="f67" src="ui/f067.jpg" alt=""><img id="f68" src="ui/f068.jpg" alt=""><img id="f69" src="ui/f069.jpg" alt=""><img id="f70" src="ui/f070.jpg" alt=""><img id="f71" src="ui/f071.jpg" alt=""><img id="f72" src="ui/f072.jpg" alt=""><img id="f73" src="ui/f073.jpg" alt=""><img id="f74" src="ui/f074.jpg" alt=""><img id="f75" src="ui/f075.jpg" alt=""><img id="f76" src="ui/f076.jpg" alt=""><img id="f77" src="ui/f077.jpg" alt=""><img id="f78" src="ui/f078.jpg" alt=""><img id="f79" src="ui/f079.jpg" alt=""><img id="f80" src="ui/f080.jpg" alt=""><img id="f81" src="ui/f081.jpg" alt=""><img id="f82" src="ui/f082.jpg" alt=""><img id="f83" src="ui/f083.jpg" alt=""><img id="f84" src="ui/f084.jpg" alt=""><img id="f85" src="ui/f085.jpg" alt=""><img id="f86" src="ui/f086.jpg" alt=""><img id="f87" src="ui/f087.jpg" alt=""><img id="f88" src="ui/f088.jpg" alt=""><img id="f89" src="ui/f089.jpg" alt=""><img id="f90" src="ui/f090.jpg" alt=""><img id="f91" src="ui/f091.jpg" alt=""><img id="f92" src="ui/f092.jpg" alt=""><img id="f93" src="ui/f093.jpg" alt=""><img id="f94" src="ui/f094.jpg" alt=""><img id="f95" src="ui/f095.jpg" alt=""><img id="f96" src="ui/f096.jpg" alt=""><img id="f97" src="ui/f097.jpg" alt=""><img id="f98" src="ui/f098.jpg" alt=""><img id="f99" src="ui/f099.jpg" alt=""><img id="f100" src="ui/f100.jpg" alt=""><img id="f101" src="ui/f101.jpg" alt="">
+        <svg class="cursor" viewBox="0 0 24 24" data-layout-allow-overflow><path d="M4 2 L4 19 L8.5 14.8 L11.6 21.5 L14.4 20.2 L11.3 13.6 L17.5 13.4 Z" fill="#fff" stroke="#000" stroke-width="1.4" stroke-linejoin="round"/></svg>
+        <div class="click" data-layout-allow-overflow></div>
       </div>
     </div>
   </div>
@@ -323,34 +336,67 @@
 
   wipe("#w3", "#s3", "#s4", 17);
 
-  /* ===== S4 (17–21) ===== */
+  /* ===== S4 (17–28): the real Settings window, typed into and switched on ===== */
   tl.fromTo(".s4-h", { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 0.7, ease: "expo.out" }, 17.25);
-  tl.fromTo(".fact", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out", stagger: 0.15 }, 17.75);
-  tl.fromTo(".fact", { borderTopColor: "#3A4E78" }, { borderTopColor: "#F3EBDD", duration: 0.3, ease: "none", stagger: 0.15 }, 18.2);
-  tl.fromTo(".s4-track", { x: 0 }, { x: -230, duration: 4, ease: "none" }, 17);
-  tl.fromTo(".s4-glow", { scale: 0.9, rotation: 0 }, { scale: 1.06, rotation: 8, duration: 4, ease: "sine.inOut" }, 17);
+  tl.fromTo(".step", { opacity: 0, x: -30 }, { opacity: 0.35, x: 0, duration: 0.5, ease: "power2.out", stagger: 0.1 }, 17.5);
+  tl.fromTo(".ui", { opacity: 0, y: 80, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: "power3.out" }, 17.3);
+  tl.fromTo(".s4-track", { x: 0 }, { x: -506, duration: 11, ease: "none" }, 17);
+  tl.fromTo(".s4-glow", { scale: 0.9, rotation: 0 }, { scale: 1.06, rotation: 10, duration: 11, ease: "sine.inOut" }, 17);
+
+  // Highlight the step being performed.
+  [["#st1", 18.0], ["#st2", 20.8], ["#st3", 22.0], ["#st2", 24.6], ["#st3", 25.3]].forEach(function (a, i, all) {
+    tl.to(".step", { opacity: 0.35, duration: 0.25 }, a[1]);
+    tl.to(a[0], { opacity: 1, duration: 0.25 }, a[1]);
+  });
+
+  // Frames are real renders of SettingsView, two keystrokes apart; each one stacks on the previous.
+  function type(from, to, start, step) {
+    for (var i = from; i <= to; i++) tl.set("#f" + i, { opacity: 1 }, start + (i - from) * step);
+  }
+  function click(x, y, t) {
+    tl.set(".click", { x: x, y: y }, t);
+    tl.fromTo(".click", { scale: 0.3, opacity: 1 }, { scale: 1.3, opacity: 0, duration: 0.45, ease: "power2.out", immediateRender: false }, t);
+  }
+  // Coordinates are screenshot px × 0.78 (1160 px render shown at 905 px).
+  tl.fromTo(".cursor", { x: 620, y: 140, opacity: 0 }, { x: 250, y: 360, opacity: 1, duration: 0.5, ease: "power3.out" }, 17.9);
+  click(258, 368, 18.45);
+  type(1, 35, 18.55, 0.06);
+  tl.to(".cursor", { x: 820, y: 706, duration: 0.45, ease: "power2.inOut" }, 20.8);
+  tl.to(".cursor", { y: 780, duration: 0.35, ease: "power2.inOut" }, 21.3);
+  click(830, 788, 21.7);
+  tl.to("#f36", { opacity: 1, duration: 0.15 }, 21.75);
+  tl.to(".cursor", { x: 460, y: 685, duration: 0.35, ease: "power3.inOut" }, 21.95);
+  click(468, 693, 22.3);
+  type(37, 78, 22.4, 0.05);
+  tl.to(".cursor", { x: 822, y: 903, duration: 0.4, ease: "power3.inOut" }, 24.6);
+  click(830, 911, 25.05);
+  tl.to("#f79", { opacity: 1, duration: 0.15 }, 25.1);
+  tl.to(".cursor", { x: 460, y: 866, duration: 0.3, ease: "power3.inOut" }, 25.3);
+  click(468, 874, 25.6);
+  type(80, 101, 25.7, 0.05);
+  tl.to(".cursor", { x: 700, y: 960, duration: 0.6, ease: "power2.inOut" }, 26.95);
 
   // S4 → S5: blur through, no train this time; the logo is the destination.
-  tl.to("#s4 .scene-content", { filter: "blur(20px)", scale: 1.08, duration: 0.3, ease: "power2.in" }, 20.7);
-  tl.set("#s4", { opacity: 0 }, 21);
-  tl.set("#s5", { opacity: 1 }, 21);
+  tl.to("#s4 .scene-content", { filter: "blur(20px)", scale: 1.08, duration: 0.3, ease: "power2.in" }, 27.7);
+  tl.set("#s4", { opacity: 0 }, 28);
+  tl.set("#s5", { opacity: 1 }, 28);
 
-  /* ===== S5 (21–25.5) ===== */
-  tl.fromTo(".icon", { scale: 0.7, opacity: 0, filter: "blur(16px)" }, { scale: 1, opacity: 1, filter: "blur(0px)", duration: 0.7, ease: "expo.out" }, 21.0);
-  tl.fromTo(".i-sl", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "sine.out" }, 21.3);
-  tl.fromTo(".i-idle", { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.6, ease: "power2.out" }, 21.5);
-  tl.fromTo(".i-route", { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.9, ease: "power2.inOut" }, 21.6);
-  tl.fromTo(".i-lever", { scale: 0, transformOrigin: "50% 50%" }, { scale: 1, duration: 0.4, ease: "back.out(3)" }, 21.8);
-  tl.fromTo(".i-dot", { scale: 0, transformOrigin: "50% 50%" }, { scale: 1, duration: 0.45, ease: "back.out(2.5)" }, 22.4);
-  tl.fromTo(".i-glow", { scale: 0, opacity: 0, transformOrigin: "50% 50%" }, { scale: 1, opacity: 1, duration: 0.6, ease: "power2.out" }, 22.45);
-  tl.fromTo(".s5-name", { opacity: 0, x: -50 }, { opacity: 1, x: 0, duration: 0.8, ease: "power4.out" }, 22.0);
-  tl.fromTo(".s5-tag", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 22.6);
-  tl.fromTo(".s5-meta", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "sine.out" }, 22.95);
-  tl.fromTo(".i-glow", { scale: 1 }, { scale: 1.18, duration: 0.7, yoyo: true, repeat: 1, ease: "sine.inOut", immediateRender: false }, 23.1);
-  tl.fromTo(".s5-glow", { scale: 0.9 }, { scale: 1.06, duration: 4.5, ease: "sine.inOut" }, 21);
+  /* ===== S5 (28–32.5) ===== */
+  tl.fromTo(".icon", { scale: 0.7, opacity: 0, filter: "blur(16px)" }, { scale: 1, opacity: 1, filter: "blur(0px)", duration: 0.7, ease: "expo.out" }, 28.0);
+  tl.fromTo(".i-sl", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "sine.out" }, 28.3);
+  tl.fromTo(".i-idle", { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.6, ease: "power2.out" }, 28.5);
+  tl.fromTo(".i-route", { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.9, ease: "power2.inOut" }, 28.6);
+  tl.fromTo(".i-lever", { scale: 0, transformOrigin: "50% 50%" }, { scale: 1, duration: 0.4, ease: "back.out(3)" }, 28.8);
+  tl.fromTo(".i-dot", { scale: 0, transformOrigin: "50% 50%" }, { scale: 1, duration: 0.45, ease: "back.out(2.5)" }, 29.4);
+  tl.fromTo(".i-glow", { scale: 0, opacity: 0, transformOrigin: "50% 50%" }, { scale: 1, opacity: 1, duration: 0.6, ease: "power2.out" }, 29.45);
+  tl.fromTo(".s5-name", { opacity: 0, x: -50 }, { opacity: 1, x: 0, duration: 0.8, ease: "power4.out" }, 29.0);
+  tl.fromTo(".s5-tag", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 29.6);
+  tl.fromTo(".s5-meta", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "sine.out" }, 29.95);
+  tl.fromTo(".i-glow", { scale: 1 }, { scale: 1.18, duration: 0.7, yoyo: true, repeat: 1, ease: "sine.inOut", immediateRender: false }, 30.1);
+  tl.fromTo(".s5-glow", { scale: 0.9 }, { scale: 1.06, duration: 4.5, ease: "sine.inOut" }, 28.0);
 
   // Final scene only: fade out
-  tl.to("#s5 .scene-content", { opacity: 0, duration: 0.7, ease: "power2.in" }, 24.7);
+  tl.to("#s5 .scene-content", { opacity: 0, duration: 0.7, ease: "power2.in" }, 31.7);
 
   window.__timelines["main"] = tl;
 </script>
