@@ -102,8 +102,7 @@ Sources/Router.swift     Config, Keychain, Jev client, decision flow, log
 Sources/Decision.swift   Pure helpers (URL redaction, pick by threshold)
 Tests/SelfTest.swift     Self-test run by build.sh
 Resources/               App icon and menu bar icons (SVG)
-video/                   Intro video (HyperFrames)
-docs/                    README header (HTML source and PNG)
+docs/                    README header (HTML source and PNG), intro video
 ```
 
 ## Roadmap
