@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIdentifier</key>
-	<string>com.romainjeff.linkrouter</string>
+	<string>com.romainjeff.pointsman</string>
 	<key>CFBundleName</key>
 	<string>Pointsman</string>
 	<key>CFBundleDisplayName</key>
