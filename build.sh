@@ -16,9 +16,8 @@ swiftc -O -parse-as-library -target arm64-apple-macos15 Sources/*.swift -o "$APP
 codesign --force --sign - "$APP"
 
 if [[ "${1:-}" == "--install" ]]; then
-  pkill -x LinkRouter || true
   pkill -x Pointsman || true
-  rm -rf ~/Applications/LinkRouter.app ~/Applications/Pointsman.app
+  rm -rf ~/Applications/Pointsman.app
   cp -R "$APP" ~/Applications/
   open ~/Applications/Pointsman.app
   echo "Installed ~/Applications/Pointsman.app"
