@@ -13,6 +13,13 @@ struct PointsmanApp: App {
         // A plain Window, not Settings: openSettings is unreliable from a menu bar–only app.
         Window("Pointsman Settings", id: "settings") {
             SettingsView(router: delegate.router)
+                // Menu bar–only app (LSUIElement), but shows in the Dock and ⌘⇥ while Settings is open.
+                .onAppear {
+                    NSApp.setActivationPolicy(.regular)
+                    NSApp.applicationIconImage = Bundle.main.url(forResource: "AppIcon", withExtension: "svg").flatMap(NSImage.init(contentsOf:))
+                    NSApp.activate(ignoringOtherApps: true)
+                }
+                .onDisappear { NSApp.setActivationPolicy(.accessory) }
         }
         .windowResizability(.contentSize)
         .defaultLaunchBehavior(CommandLine.arguments.contains("--settings") ? .presented : .suppressed)
