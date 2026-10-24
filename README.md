@@ -45,7 +45,7 @@ A wrong guess costs you one link in the wrong browser; it never blocks a link. I
 There is no signed release yet; build from source:
 
 ```bash
-git clone <repository-url> pointsman
+git clone https://github.com/romainjeff/pointsman.git
 cd pointsman
 ./build.sh --install
 ```
