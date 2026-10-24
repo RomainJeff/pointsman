@@ -57,6 +57,13 @@ struct MenuContent: View {
         Divider()
         Toggle("Routage intelligent", isOn: $router.config.enabled)
             .keyboardShortcut("e")
+        if !router.config.browsers.isEmpty {
+            Menu("Navigateurs proposés à Jev") {
+                ForEach($router.config.browsers, id: \.bundleId) { $b in
+                    Toggle(b.name, isOn: $b.enabled)
+                }
+            }
+        }
         Button("Réglages…") { openSettings() }
             .keyboardShortcut(",")
         Button("Ouvrir le journal") { NSWorkspace.shared.open(Router.logURL) }
@@ -68,7 +75,7 @@ struct MenuContent: View {
     private var status: String {
         let fallback = installedBrowsers().first { $0.id == router.config.fallback }?.name ?? router.config.fallback
         guard router.config.enabled else { return "En pause : tout va vers \(fallback)" }
-        return "Actif : \(router.config.browsers.count) navigateur(s), repli \(fallback)"
+        return "Actif : \(router.config.browsers.filter(\.enabled).count) navigateur(s), repli \(fallback)"
     }
 
     private func openSettings() {
@@ -90,15 +97,17 @@ struct SettingsView: View {
             }
             Section {
                 ForEach(installed) { b in
+                    let r = rule(for: b)
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(b.name).bold()
-                        TextField("Quand le choisir, quand l'éviter", text: description(for: b), axis: .vertical)
+                        Toggle(isOn: r.enabled) { Text(b.name).bold() }
+                        TextField("Quand le choisir, quand l'éviter", text: r.description, axis: .vertical)
+                            .disabled(!r.wrappedValue.enabled)
                     }
                 }
             } header: {
                 Text("Navigateurs")
             } footer: {
-                Text("Description vide = jamais proposé au modèle. Écrire en anglais donne de meilleurs résultats avec Jev.")
+                Text("Seuls les navigateurs activés sont proposés à Jev ; la description est gardée quand tu désactives. Écrire en anglais donne de meilleurs résultats.")
             }
             Section("Repli") {
                 Picker("Navigateur par défaut", selection: $router.config.fallback) {
@@ -121,14 +130,17 @@ struct SettingsView: View {
         .frame(width: 540, height: 680)
     }
 
-    private func description(for b: InstalledBrowser) -> Binding<String> {
+    /// Rules exist only for browsers that are enabled or described, so the JSON stays short.
+    private func rule(for b: InstalledBrowser) -> Binding<BrowserRule> {
         Binding(
-            get: { router.config.browsers.first { $0.bundleId == b.id }?.description ?? "" },
-            set: { text in
-                if let i = router.config.browsers.firstIndex(where: { $0.bundleId == b.id }) {
-                    if text.isEmpty { router.config.browsers.remove(at: i) } else { router.config.browsers[i].description = text }
-                } else if !text.isEmpty {
-                    router.config.browsers.append(BrowserRule(bundleId: b.id, name: b.name, description: text))
+            get: { router.config.browsers.first { $0.bundleId == b.id } ?? BrowserRule(bundleId: b.id, name: b.name, description: "", enabled: false) },
+            set: { new in
+                let keep = new.enabled || !new.description.isEmpty
+                switch (router.config.browsers.firstIndex { $0.bundleId == b.id }, keep) {
+                case let (i?, true): router.config.browsers[i] = new
+                case let (i?, false): router.config.browsers.remove(at: i)
+                case (nil, true): router.config.browsers.append(new)
+                case (nil, false): break
                 }
             })
     }

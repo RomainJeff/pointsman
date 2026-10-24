@@ -6,6 +6,18 @@ struct BrowserRule: Codable, Hashable {
     var bundleId: String
     var name: String
     var description: String
+    var enabled = true
+}
+
+extension BrowserRule {
+    // Configs written before the toggle existed have no "enabled" key: treat them as enabled.
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        bundleId = try c.decode(String.self, forKey: .bundleId)
+        name = try c.decode(String.self, forKey: .name)
+        description = try c.decode(String.self, forKey: .description)
+        enabled = try c.decodeIfPresent(Bool.self, forKey: .enabled) ?? true
+    }
 }
 
 /// Portable config: plain JSON in ~/.config, readable by a future Windows/Linux shim.
@@ -137,14 +149,14 @@ final class Router {
         var out: [Issue] = []
         if !isDefault { out.append(.notDefault) }
         if !hasKey { out.append(.noKey) }
-        if config.browsers.isEmpty { out.append(.noBrowsers) }
+        if !config.browsers.contains(where: \.enabled) { out.append(.noBrowsers) }
         return out
     }
 
     enum Issue: String {
         case notDefault = "Pas navigateur par défaut"
         case noKey = "Clé OpenRouter manquante"
-        case noBrowsers = "Aucun navigateur décrit"
+        case noBrowsers = "Aucun navigateur activé"
     }
 
     static let logURL = FileManager.default.homeDirectoryForCurrentUser.appending(path: "Library/Logs/LinkRouter/decisions.jsonl")
@@ -181,7 +193,8 @@ final class Router {
         guard c.enabled else { return (c.fallback, "désactivé") }
         // ponytail: local URLs (OAuth callbacks from CLIs, dev servers) never go to the model
         guard let host = url.host, !["localhost", "127.0.0.1", "::1"].contains(host) else { return (c.fallback, "local") }
-        guard !c.browsers.isEmpty else { return (c.fallback, "aucun candidat") }
+        let candidates = c.browsers.filter(\.enabled)
+        guard !candidates.isEmpty else { return (c.fallback, "aucun candidat") }
         guard let key = ProcessInfo.processInfo.environment["OPENROUTER_API_KEY"] ?? Keychain.get() else { return (c.fallback, "pas de clé") }
 
         let state = """
@@ -189,12 +202,12 @@ final class Router {
         Link clicked in app: \(opener.name) (\(opener.bundleId))
         URL: \(Decision.redact(url))
         """
-        var options = Dictionary(uniqueKeysWithValues: c.browsers.map { ($0.bundleId, "\($0.name): \($0.description)") })
+        var options = Dictionary(uniqueKeysWithValues: candidates.map { ($0.bundleId, "\($0.name): \($0.description)") })
         options[Decision.unsure] = "No browser clearly fits this link"
         do {
             let probs = try await Jev.choose(state: state, options: options, model: c.model, key: key)
             let top = probs.max { $0.value < $1.value }.map { "\(Int($0.value * 100)) %" } ?? "?"
-            guard let id = Decision.pick(probs, candidates: Set(c.browsers.map(\.bundleId)), threshold: c.threshold) else {
+            guard let id = Decision.pick(probs, candidates: Set(candidates.map(\.bundleId)), threshold: c.threshold) else {
                 return (c.fallback, "incertain \(top)")
             }
             return (id, "jev \(top)")
