@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct LinkRouterApp: App {
+struct PointsmanApp: App {
     @NSApplicationDelegateAdaptor private var delegate: AppDelegate
 
     var body: some Scene {
@@ -11,7 +11,7 @@ struct LinkRouterApp: App {
             Image(nsImage: menuBarIcon(icon))
         }
         // A plain Window, not Settings: openSettings is unreliable from a menu bar–only app.
-        Window("Réglages Link Router", id: "settings") {
+        Window("Pointsman Settings", id: "settings") {
             SettingsView(router: delegate.router)
         }
         .windowResizability(.contentSize)
@@ -30,7 +30,7 @@ private func menuBarIcon(_ name: String) -> NSImage {
     let image = Bundle.main.url(forResource: name, withExtension: "svg").flatMap(NSImage.init(contentsOf:))
         ?? NSImage(systemSymbolName: "arrow.triangle.branch", accessibilityDescription: nil)!
     image.isTemplate = true
-    image.accessibilityDescription = "Link Router"
+    image.accessibilityDescription = "Pointsman"
     return image
 }
 
@@ -64,29 +64,29 @@ struct MenuContent: View {
                 issue == .notDefault ? router.makeDefault() : openSettings()
             }
         }
-        Text("Dernier : \(router.last)")
+        Text("Last: \(router.last)")
         Divider()
-        Toggle("Routage intelligent", isOn: $router.config.enabled)
+        Toggle("Smart routing", isOn: $router.config.enabled)
             .keyboardShortcut("e")
         if !router.config.browsers.isEmpty {
-            Menu("Navigateurs proposés à Jev") {
+            Menu("Browsers offered to Jev") {
                 ForEach($router.config.browsers, id: \.bundleId) { $b in
                     Toggle(b.name, isOn: $b.enabled)
                 }
             }
         }
-        Button("Réglages…") { openSettings() }
+        Button("Settings…") { openSettings() }
             .keyboardShortcut(",")
-        Button("Ouvrir le journal") { NSWorkspace.shared.open(Router.logURL) }
+        Button("Open log") { NSWorkspace.shared.open(Router.logURL) }
         Divider()
-        Button("Quitter") { NSApp.terminate(nil) }
+        Button("Quit Pointsman") { NSApp.terminate(nil) }
             .keyboardShortcut("q")
     }
 
     private var status: String {
         let fallback = installedBrowsers().first { $0.id == router.config.fallback }?.name ?? router.config.fallback
-        guard router.config.enabled else { return "En pause : tout va vers \(fallback)" }
-        return "Actif : \(router.config.browsers.filter(\.enabled).count) navigateur(s), repli \(fallback)"
+        guard router.config.enabled else { return "Paused: everything goes to \(fallback)" }
+        return "Active: \(router.config.browsers.filter(\.enabled).count) browser(s), fallback \(fallback)"
     }
 
     private func openSettings() {
@@ -133,7 +133,7 @@ struct SettingsView: View {
     @State private var pane = Pane.browsers
 
     enum Pane: String, CaseIterable {
-        case browsers = "Navigateurs", decision = "Décision", general = "Général"
+        case browsers = "Browsers", decision = "Decision", general = "General"
     }
 
     var body: some View {
@@ -170,11 +170,11 @@ struct SettingsView: View {
                 }
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Pointsman").font(.system(size: 22, weight: .semibold, design: .rounded))
-                    Text("Chaque lien part vers le navigateur qui lui correspond.")
+                    Text("Every link goes to the browser it belongs in.")
                         .foregroundStyle(Color.cream.opacity(0.6))
                 }
                 Spacer()
-                Toggle(router.config.enabled ? "Actif" : "En pause", isOn: $router.config.enabled)
+                Toggle(router.config.enabled ? "Active" : "Paused", isOn: $router.config.enabled)
                     .toggleStyle(.switch)
             }
             .foregroundStyle(Color.cream)
@@ -209,32 +209,32 @@ struct BrowsersPane: View {
         let others = installed.filter { !rule(for: $0).wrappedValue.enabled }
         Form {
             Section {
-                TextField("Contexte", text: $router.config.globalContext,
+                TextField("Context", text: $router.config.globalContext,
                           prompt: Text("I'm a developer. Work tools go in Chrome, personal browsing in Safari."), axis: .vertical)
                     .lineLimit(3...6)
                     .well()
             } header: {
-                Text("Ton contexte")
+                Text("Your context")
             } footer: {
-                Text("Envoyé à Jev avec chaque lien. Jev comprend mieux l'anglais.")
+                Text("Sent to Jev with every link. Jev works best in English.")
             }
             Section {
                 if offered.isEmpty {
-                    Text("Active au moins un navigateur, sinon chaque lien part vers le repli.")
+                    Text("Enable at least one browser, or every link goes to the fallback.")
                         .foregroundStyle(.secondary)
                 }
                 ForEach(offered) { b in
                     BrowserRow(browser: b, rule: rule(for: b), isFallback: b.id == router.config.fallback)
                 }
-                DisclosureGroup("Autres navigateurs installés (\(others.count))", isExpanded: $showOthers) {
+                DisclosureGroup("Other installed browsers (\(others.count))", isExpanded: $showOthers) {
                     ForEach(others) { b in
                         BrowserRow(browser: b, rule: rule(for: b), isFallback: b.id == router.config.fallback)
                     }
                 }
             } header: {
-                Text("Navigateurs proposés à Jev")
+                Text("Browsers offered to Jev")
             } footer: {
-                Text("Décris quand choisir chaque navigateur et quand l'éviter. Un navigateur retiré garde sa description.")
+                Text("Describe when to pick each browser and when to avoid it. A removed browser keeps its description.")
             }
         }
     }
@@ -267,7 +267,7 @@ struct BrowserRow: View {
                     Image(nsImage: appIcon(browser.id))
                     Text(browser.name).font(.headline)
                     if isFallback {
-                        Text("Repli")
+                        Text("Fallback")
                             .font(.caption.weight(.medium))
                             .padding(.horizontal, 7)
                             .padding(.vertical, 2)
@@ -301,42 +301,42 @@ struct DecisionPane: View {
     var body: some View {
         Form {
             Section {
-                Picker("Navigateur de repli", selection: $router.config.fallback) {
+                Picker("Fallback browser", selection: $router.config.fallback) {
                     ForEach(installed) { b in
                         Label { Text(b.name) } icon: { Image(nsImage: appIcon(b.id, size: 16)) }.tag(b.id)
                     }
                 }
-                LabeledContent("Confiance minimum") {
+                LabeledContent("Minimum confidence") {
                     HStack {
                         Slider(value: $router.config.threshold, in: 0.3...0.95, step: 0.05).frame(width: 180)
-                        Text("\(Int((router.config.threshold * 100).rounded())) %")
+                        Text("\(Int((router.config.threshold * 100).rounded()))%")
                             .monospacedDigit()
                             .frame(width: 40, alignment: .trailing)
                     }
                 }
             } header: {
-                Text("Quand Jev hésite")
+                Text("When Jev is unsure")
             } footer: {
-                Text("Sous ce seuil, ou si Jev ne trouve aucun navigateur adapté, le lien part vers le repli.")
+                Text("Below this threshold, or when no browser fits, the link goes to the fallback.")
             }
             Section {
-                TextField("Lien", text: $link)
-                TextField("Cliqué depuis", text: $opener)
+                TextField("Link", text: $link)
+                TextField("Clicked from", text: $opener)
                 HStack {
                     if let failure { Text(failure).foregroundStyle(.red).lineLimit(2) }
                     Spacer()
                     if asking { ProgressView().controlSize(.small) }
-                    Button("Tester ce lien", action: test)
+                    Button("Test this link", action: test)
                         .keyboardShortcut(.defaultAction)
                         .disabled(asking || !router.hasKey || URL(string: link)?.host == nil)
                 }
                 if !probabilities.isEmpty { bench }
             } header: {
-                Text("Banc d'essai")
+                Text("Test bench")
             } footer: {
                 Text(router.hasKey
-                     ? "Envoie le lien à Jev avec ta configuration actuelle. Rien ne s'ouvre."
-                     : "Ajoute ta clé OpenRouter dans Général pour tester.")
+                     ? "Sends the link to Jev with your current settings. Nothing opens."
+                     : "Add your OpenRouter key in General to test.")
             }
         }
     }
@@ -351,7 +351,7 @@ struct DecisionPane: View {
                 HStack(spacing: 10) {
                     if id == Decision.unsure {
                         Image(systemName: "questionmark.circle").frame(width: 18)
-                        Text("Aucun").frame(width: 90, alignment: .leading)
+                        Text("None").frame(width: 90, alignment: .leading)
                     } else {
                         Image(nsImage: appIcon(id, size: 18))
                         Text(router.config.browsers.first { $0.bundleId == id }?.name ?? id)
@@ -359,13 +359,13 @@ struct DecisionPane: View {
                             .lineLimit(1)
                     }
                     TrackBar(value: p, threshold: router.config.threshold, chosen: id == winner)
-                    Text("\(Int((p * 100).rounded())) %")
+                    Text("\(Int((p * 100).rounded()))%")
                         .monospacedDigit()
                         .frame(width: 40, alignment: .trailing)
                 }
             }
-            Text(winner.map { id in "Ce lien s'ouvrirait dans \(router.config.browsers.first { $0.bundleId == id }?.name ?? id)." }
-                 ?? "Pas assez sûr : ce lien s'ouvrirait dans \(fallbackName), le repli.")
+            Text(winner.map { id in "This link would open in \(router.config.browsers.first { $0.bundleId == id }?.name ?? id)." }
+                 ?? "Not sure enough: this link would open in \(fallbackName), the fallback.")
                 .font(.callout.weight(.medium))
                 .foregroundStyle(winner == nil ? Color.cream.opacity(0.7) : Color.amber)
                 .padding(.top, 4)
@@ -414,7 +414,7 @@ struct TrackBar: View {
             ctx.fill(Path(CGRect(x: t - 0.75, y: 0, width: 1.5, height: size.height)), with: .color(.cream.opacity(0.8)))
         }
         .frame(height: 20)
-        .accessibilityLabel("\(Int(value * 100)) %, seuil \(Int(threshold * 100)) %")
+        .accessibilityLabel("\(Int(value * 100))%, threshold \(Int(threshold * 100))%")
     }
 }
 
@@ -425,34 +425,34 @@ struct GeneralPane: View {
     var body: some View {
         Form {
             Section {
-                LabeledContent("Navigateur par défaut") {
+                LabeledContent("Default browser") {
                     if router.isDefault {
-                        Label("Pointsman reçoit tes liens", systemImage: "checkmark.circle.fill")
+                        Label("Pointsman receives your links", systemImage: "checkmark.circle.fill")
                             .foregroundStyle(Color.cream.opacity(0.8))
                     } else {
-                        Button("Définir par défaut") { router.makeDefault() }
+                        Button("Make default") { router.makeDefault() }
                     }
                 }
             } footer: {
-                Text("Pour revenir en arrière, choisis un autre navigateur dans Réglages Système > Bureau et Dock.")
+                Text("To undo, pick another browser in System Settings > Desktop & Dock.")
             }
             Section {
-                SecureField("Clé API", text: $apiKey, prompt: Text("sk-or-…"))
+                SecureField("API key", text: $apiKey, prompt: Text("sk-or-…"))
                     .onChange(of: apiKey) {
                         Keychain.set(apiKey)
                         router.hasKey = Router.apiKey != nil
                     }
-                TextField("Modèle", text: $router.config.model)
+                TextField("Model", text: $router.config.model)
             } header: {
                 Text("OpenRouter")
             } footer: {
-                Text("La clé reste dans le Trousseau macOS. Jev reçoit le domaine et le chemin du lien, jamais ses paramètres.")
+                Text("The key stays in the macOS Keychain. Jev gets the link's domain and path, never its parameters.")
             }
             Section {
-                LabeledContent("Fichiers") {
+                LabeledContent("Files") {
                     HStack {
-                        Button("Journal des décisions") { NSWorkspace.shared.open(Router.logURL) }
-                        Button("Configuration") { NSWorkspace.shared.activateFileViewerSelecting([Config.url]) }
+                        Button("Decision log") { NSWorkspace.shared.open(Router.logURL) }
+                        Button("Config file") { NSWorkspace.shared.activateFileViewerSelecting([Config.url]) }
                     }
                 }
             }

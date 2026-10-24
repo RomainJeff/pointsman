@@ -139,7 +139,7 @@ final class Router {
     var config = Config.load() {
         didSet { config.save() }
     }
-    var last = "Aucun lien routé"
+    var last = "No link routed yet"
     var hasKey = Router.apiKey != nil
     // ponytail: refreshed on launch, after makeDefault and per link; a change made in System Settings shows up on the next link
     var isDefault = false
@@ -154,9 +154,9 @@ final class Router {
     }
 
     enum Issue: String {
-        case notDefault = "Pas navigateur par défaut"
-        case noKey = "Clé OpenRouter manquante"
-        case noBrowsers = "Aucun navigateur activé"
+        case notDefault = "Not the default browser"
+        case noKey = "OpenRouter key missing"
+        case noBrowsers = "No browser enabled"
     }
 
     static let logURL = FileManager.default.homeDirectoryForCurrentUser.appending(path: "Library/Logs/LinkRouter/decisions.jsonl")
@@ -190,21 +190,21 @@ final class Router {
 
     private func decide(_ url: URL, opener: Opener) async -> (String, String) {
         let c = config
-        guard c.enabled else { return (c.fallback, "désactivé") }
+        guard c.enabled else { return (c.fallback, "paused") }
         // ponytail: local URLs (OAuth callbacks from CLIs, dev servers) never go to the model
         guard let host = url.host, !["localhost", "127.0.0.1", "::1"].contains(host) else { return (c.fallback, "local") }
         let candidates = c.browsers.filter(\.enabled)
-        guard !candidates.isEmpty else { return (c.fallback, "aucun candidat") }
-        guard Self.apiKey != nil else { return (c.fallback, "pas de clé") }
+        guard !candidates.isEmpty else { return (c.fallback, "no candidate") }
+        guard Self.apiKey != nil else { return (c.fallback, "no key") }
         do {
             let probs = try await ask(url, openerName: opener.name, openerId: opener.bundleId)
-            let top = probs.max { $0.value < $1.value }.map { "\(Int($0.value * 100)) %" } ?? "?"
+            let top = probs.max { $0.value < $1.value }.map { "\(Int($0.value * 100))%" } ?? "?"
             guard let id = Decision.pick(probs, candidates: Set(candidates.map(\.bundleId)), threshold: c.threshold) else {
-                return (c.fallback, "incertain \(top)")
+                return (c.fallback, "unsure \(top)")
             }
             return (id, "jev \(top)")
         } catch {
-            return (c.fallback, "erreur: \(error.localizedDescription)")
+            return (c.fallback, "error: \(error.localizedDescription)")
         }
     }
 
@@ -212,7 +212,7 @@ final class Router {
 
     /// Jev's probability per enabled browser, plus "none". Shared by real links and the settings test bench.
     func ask(_ url: URL, openerName: String, openerId: String) async throws -> [String: Double] {
-        guard let key = Self.apiKey else { throw Jev.Failure(errorDescription: "Clé OpenRouter manquante") }
+        guard let key = Self.apiKey else { throw Jev.Failure(errorDescription: "OpenRouter key missing") }
         let c = config
         let state = """
         User context: \(c.globalContext.isEmpty ? "(none)" : c.globalContext)
