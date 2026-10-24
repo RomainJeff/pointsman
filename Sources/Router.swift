@@ -128,6 +128,24 @@ final class Router {
         didSet { config.save() }
     }
     var last = "Aucun lien routé"
+    var hasKey = ProcessInfo.processInfo.environment["OPENROUTER_API_KEY"] != nil || Keychain.get() != nil
+    // ponytail: refreshed on launch, after makeDefault and per link; a change made in System Settings shows up on the next link
+    var isDefault = false
+
+    /// Setup gaps that make every link silently fall back; surfaced in the menu bar.
+    var issues: [Issue] {
+        var out: [Issue] = []
+        if !isDefault { out.append(.notDefault) }
+        if !hasKey { out.append(.noKey) }
+        if config.browsers.isEmpty { out.append(.noBrowsers) }
+        return out
+    }
+
+    enum Issue: String {
+        case notDefault = "Pas navigateur par défaut"
+        case noKey = "Clé OpenRouter manquante"
+        case noBrowsers = "Aucun navigateur décrit"
+    }
 
     static let logURL = FileManager.default.homeDirectoryForCurrentUser.appending(path: "Library/Logs/LinkRouter/decisions.jsonl")
 
@@ -135,10 +153,17 @@ final class Router {
         if config.fallback.isEmpty {
             config.fallback = Self.currentDefault() ?? "com.apple.Safari"
         }
+        refreshDefault()
+    }
+
+    func refreshDefault() {
+        let app = NSWorkspace.shared.urlForApplication(toOpen: URL(string: "https://example.com")!)
+        isDefault = app.flatMap { Bundle(url: $0)?.bundleIdentifier } == Bundle.main.bundleIdentifier
     }
 
     func open(_ url: URL, from opener: Opener) async {
         let start = Date()
+        refreshDefault()
         let (target, reason) = await decide(url, opener: opener)
         let ws = NSWorkspace.shared
         if let app = ws.urlForApplication(withBundleIdentifier: target) ?? ws.urlForApplication(withBundleIdentifier: "com.apple.Safari") {
@@ -180,7 +205,9 @@ final class Router {
 
     func makeDefault() {
         for scheme in ["http", "https"] {
-            NSWorkspace.shared.setDefaultApplication(at: Bundle.main.bundleURL, toOpenURLsWithScheme: scheme) { _ in }
+            NSWorkspace.shared.setDefaultApplication(at: Bundle.main.bundleURL, toOpenURLsWithScheme: scheme) { _ in
+                Task { @MainActor in self.refreshDefault() }
+            }
         }
     }
 

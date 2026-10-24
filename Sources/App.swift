@@ -5,12 +5,21 @@ struct LinkRouterApp: App {
     @NSApplicationDelegateAdaptor private var delegate: AppDelegate
 
     var body: some Scene {
-        MenuBarExtra("Link Router", systemImage: delegate.router.config.enabled ? "arrow.triangle.branch" : "pause.circle") {
+        MenuBarExtra("Link Router", systemImage: icon) {
             MenuContent(router: delegate.router)
         }
-        Settings {
+        // A plain Window, not Settings: openSettings is unreliable from a menu bar–only app.
+        Window("Réglages Link Router", id: "settings") {
             SettingsView(router: delegate.router)
         }
+        .windowResizability(.contentSize)
+        .defaultLaunchBehavior(.suppressed)
+    }
+
+    private var icon: String {
+        let r = delegate.router
+        if !r.config.enabled { return "pause.circle" }
+        return r.issues.isEmpty ? "arrow.triangle.branch" : "exclamationmark.triangle"
     }
 }
 
@@ -35,20 +44,36 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
 struct MenuContent: View {
     @Bindable var router: Router
-    @Environment(\.openSettings) private var openSettings
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
-        Toggle("Routage intelligent", isOn: $router.config.enabled)
-        Text(router.last)
-        Divider()
-        Button("Réglages…") {
-            NSApp.activate()
-            openSettings()
+        Text(status)
+        ForEach(router.issues, id: \.self) { issue in
+            Button("⚠︎ \(issue.rawValue)") {
+                issue == .notDefault ? router.makeDefault() : openSettings()
+            }
         }
-        Button("Définir comme navigateur par défaut") { router.makeDefault() }
+        Text("Dernier : \(router.last)")
+        Divider()
+        Toggle("Routage intelligent", isOn: $router.config.enabled)
+            .keyboardShortcut("e")
+        Button("Réglages…") { openSettings() }
+            .keyboardShortcut(",")
         Button("Ouvrir le journal") { NSWorkspace.shared.open(Router.logURL) }
         Divider()
         Button("Quitter") { NSApp.terminate(nil) }
+            .keyboardShortcut("q")
+    }
+
+    private var status: String {
+        let fallback = installedBrowsers().first { $0.id == router.config.fallback }?.name ?? router.config.fallback
+        guard router.config.enabled else { return "En pause : tout va vers \(fallback)" }
+        return "Actif : \(router.config.browsers.count) navigateur(s), repli \(fallback)"
+    }
+
+    private func openSettings() {
+        openWindow(id: "settings")
+        NSApp.activate(ignoringOtherApps: true)
     }
 }
 
@@ -86,7 +111,10 @@ struct SettingsView: View {
             Section("Modèle (OpenRouter)") {
                 TextField("Modèle", text: $router.config.model)
                 SecureField("Clé OpenRouter (stockée dans le Trousseau)", text: $apiKey)
-                    .onChange(of: apiKey) { Keychain.set(apiKey) }
+                    .onChange(of: apiKey) {
+                        Keychain.set(apiKey)
+                        router.hasKey = !apiKey.isEmpty
+                    }
             }
         }
         .formStyle(.grouped)
